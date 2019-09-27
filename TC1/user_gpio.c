@@ -173,7 +173,7 @@ static void key_falling_irq_handler( void* arg )
 }
 void key_init( void )
 {
-    MicoGpioInitialize( Button, INPUT_PULL_UP );
+    // MicoGpioInitialize( Button, INPUT_PULL_UP );
     mico_rtos_init_timer( &user_key_timer, 100, key_timeout_handler, NULL );
 
     MicoGpioEnableIRQ( Button, IRQ_TRIGGER_FALLING_EDGE, key_falling_irq_handler, NULL );

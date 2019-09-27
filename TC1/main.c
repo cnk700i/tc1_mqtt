@@ -2,7 +2,7 @@
 
 #include "user_gpio.h"
 #include "user_wifi.h"
-#include "user_rtc.h"
+#include "user_sntp.h"
 #include "user_power.h"
 #include "user_mqtt_client.h"
 #include "user_function.h"
@@ -12,8 +12,9 @@
 
 
 
-char rtc_init = 0;    //sntp校时成功标志位
-uint32_t total_time=0;
+char first_sntp = 0;    //sntp校时成功标志位
+uint32_t sntp_count=0;
+uint32_t run_time=0;
 char strMac[16] = { 0 };
 uint32_t power=0;
 
@@ -104,14 +105,18 @@ int application_start( void )
         require_noerr( err, exit );
     }
 
+    wifi_init( );
+    mico_thread_msleep(1000);
+
+    IPStatusTypedef para;
+    micoWlanGetIPStatus( &para, Station );
+    os_log( "micoWlanGetIPStatus:%d", micoWlanGetIPStatus( &para, Station ));   //mac读出来全部是0??!!!
+    strcpy( strMac, para.mac );
+    os_log( "result:%s",strMac );
+    os_log( "result:%s",para.mac );
+
     if ( sys_config->micoSystemConfig.name[0] == 1 )
     {
-        IPStatusTypedef para;
-        os_log( "micoWlanGetIPStatus:%d", micoWlanGetIPStatus( &para, Station ));   //mac读出来全部是0??!!!
-        strcpy( strMac, para.mac );
-        os_log( "result:%s",strMac );
-        os_log( "result:%s",para.mac );
-
         sprintf( sys_config->micoSystemConfig.name, ZTC_NAME, strMac );
     }
 
@@ -135,13 +140,12 @@ int application_start( void )
 //        }
 //    }
 
-    wifi_init( );
+
     // user_udp_init( );
     key_init( );
     err = user_mqtt_init( );
     require_noerr( err, exit );
-    err = user_rtc_init( );
-    require_noerr( err, exit );
+    sntp_init();
     user_power_init();
 
     /* start http server thread */
@@ -158,14 +162,13 @@ int application_start( void )
             // power_buf = malloc( 128 );
             // if ( power_buf != NULL )
             // {
-            //     sprintf( power_buf, "{\"power\":\"%d.%d\",\"total_time\":%d}", power / 10, power % 10, total_time );
+            //     sprintf( power_buf, "{\"power\":\"%d.%d\",\"run_time\":%d}", power / 10, power % 10, run_time );
             //     user_mqtt_send( power_buf );
             //     free( power_buf );
             // }
             user_mqtt_hass_power( );
         }
         mico_thread_msleep(STATE_UPDATE_INTERVAL);
-
     }
     exit:
     os_log("application_start ERROR!");

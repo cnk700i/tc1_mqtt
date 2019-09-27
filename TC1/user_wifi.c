@@ -3,7 +3,7 @@
 #include "main.h"
 #include "mico_socket.h"
 #include "user_gpio.h"
-#include "user_sntp.h"
+
 #include "user_function.h"
 #define os_log(format, ...)  custom_log("WIFI", format, ##__VA_ARGS__)
 
@@ -132,20 +132,16 @@ void wifi_init( void )
 //    micoWlanStart(&wNetConfig);
 
     //wifi状态下led闪烁定时器初始化
-    mico_rtos_init_timer( &wifi_led_timer, 100, (void *) wifi_led_timer_callback, NULL );
+    mico_rtos_init_timer( &wifi_led_timer, 1000, (void *) wifi_led_timer_callback, NULL );
     //easylink 完成回调
     mico_system_notify_register( mico_notify_EASYLINK_WPS_COMPLETED, (void *) wifi_easylink_completed_handle, NULL );
     //wifi已连接获取到IP地址 回调
     mico_system_notify_register( mico_notify_DHCP_COMPLETED, (void *) wifi_get_ip_callback, NULL );
     //wifi连接状态改变回调
     mico_system_notify_register( mico_notify_WIFI_STATUS_CHANGED, (void*) wifi_status_callback, NULL );
-    //sntp_init();
+
     //启动定时器开始进行wifi连接
     if ( !mico_rtos_is_timer_running( &wifi_led_timer ) ) mico_rtos_start_timer( &wifi_led_timer );
-
-    IPStatusTypedef para;
-    micoWlanGetIPStatus( &para, Station );
-    strcpy( strMac, para.mac );
 
 }
 

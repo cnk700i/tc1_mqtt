@@ -369,7 +369,7 @@ void mqtt_client_thread( mico_thread_arg_t arg )
             {
                 // get msg from send queue
                 mico_rtos_pop_from_queue( &mqtt_msg_send_queue, &p_send_msg, 0 );
-                require_string( p_send_msg, exit, "Wrong data point" );
+                // require_string( p_send_msg, exit, "Wrong data point" );
 
                 // send message to server
                 err = mqtt_msg_publish( &c, p_send_msg->topic, p_send_msg->qos, p_send_msg->retained,
@@ -506,6 +506,10 @@ OSStatus user_mqtt_send( char *arg )
 OSStatus user_mqtt_send_slot_state(unsigned char slot_id )
 {
     OSStatus err = kUnknownErr;
+    if (isconnect == false)
+    {
+        return err;
+    }
     char *send_buf = NULL;
     char *topic_buf = NULL;
     send_buf = malloc( 64 ); //
@@ -525,6 +529,10 @@ OSStatus user_mqtt_send_slot_state(unsigned char slot_id )
 OSStatus user_mqtt_send_tc1_state(void)
 {
     OSStatus err = kUnknownErr;
+    if (isconnect == false)
+    {
+        return err;
+    }
     char *send_buf = NULL;
     send_buf = malloc( 32 );
     if ( send_buf != NULL)
@@ -540,6 +548,10 @@ OSStatus user_mqtt_send_tc1_state(void)
 OSStatus user_mqtt_hass_auto_slot( char slot_id )
 {
     OSStatus err = kUnknownErr;
+    if (isconnect == false)
+    {
+        return err;
+    }
     char *send_buf = NULL;
     char *topic_buf = NULL;
     send_buf = malloc( 512 ); //
@@ -567,6 +579,10 @@ OSStatus user_mqtt_hass_auto_slot( char slot_id )
 OSStatus user_mqtt_hass_auto_power( void )
 {
     OSStatus err = kUnknownErr;
+    if (isconnect == false)
+    {
+        return err;
+    }
     char *send_buf = NULL;
     char *topic_buf = NULL;
     send_buf = malloc( 512 ); //
@@ -593,6 +609,10 @@ OSStatus user_mqtt_hass_auto_power( void )
 OSStatus user_mqtt_hass_power( void )
 {
     OSStatus err = kUnknownErr;
+    if (isconnect == false)
+    {
+        return err;
+    }
     char *send_buf = NULL;
     char *topic_buf = NULL;
     send_buf = malloc( 512 ); //
